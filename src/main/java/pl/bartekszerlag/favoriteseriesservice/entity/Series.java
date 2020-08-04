@@ -1,4 +1,4 @@
-package pl.bartekszerlag.favoriteseriesservice;
+package pl.bartekszerlag.favoriteseriesservice.entity;
 
 import org.hibernate.annotations.GenericGenerator;
 
@@ -9,7 +9,7 @@ import javax.persistence.Table;
 
 @Entity
 @Table(name = "series")
-class Series {
+public class Series {
 
     @Id
     @GeneratedValue(generator = "inc")

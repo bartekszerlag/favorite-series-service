@@ -1,32 +1,38 @@
-package pl.bartekszerlag.favoriteseriesservice;
+package pl.bartekszerlag.favoriteseriesservice.service;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import pl.bartekszerlag.favoriteseriesservice.entity.Series;
+import pl.bartekszerlag.favoriteseriesservice.exception.SeriesLimitExceededException;
+import pl.bartekszerlag.favoriteseriesservice.exception.SeriesNotFoundException;
+import pl.bartekszerlag.favoriteseriesservice.repository.SeriesRepository;
 
 import java.util.List;
 
 @Service
-class SeriesService {
+public class SeriesService {
 
     public final static int RANK_LIMIT = 10;
 
     private final SeriesRepository repository;
 
+    @Autowired
     SeriesService(SeriesRepository repository) {
         this.repository = repository;
     }
 
-    List<Series> findAll() {
+    public List<Series> findAll() {
         return repository.findAll();
     }
 
-    void add(Series series) {
+    public void add(Series series) {
         if (findAll().size() >= RANK_LIMIT) {
             throw new SeriesLimitExceededException();
         }
         repository.save(series);
     }
 
-    Series update(Integer id, Series oldSeries) {
+    public Series update(Integer id, Series oldSeries) {
         Series series = findById(id);
         series.setTitle(oldSeries.getTitle());
         series.setRate(oldSeries.getRate());
@@ -35,12 +41,12 @@ class SeriesService {
         return repository.save(series);
     }
 
-    void delete(Integer id) {
+    public void delete(Integer id) {
         Series series = findById(id);
         repository.delete(series);
     }
 
-    String getTitle(Integer id) {
+    public String getTitle(Integer id) {
         Series series = findById(id);
         return series.getTitle();
     }

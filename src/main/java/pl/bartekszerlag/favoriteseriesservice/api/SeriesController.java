@@ -1,9 +1,16 @@
-package pl.bartekszerlag.favoriteseriesservice;
+package pl.bartekszerlag.favoriteseriesservice.api;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import pl.bartekszerlag.favoriteseriesservice.entity.Series;
+import pl.bartekszerlag.favoriteseriesservice.exception.SeriesLimitExceededException;
+import pl.bartekszerlag.favoriteseriesservice.exception.SeriesNotFoundException;
+import pl.bartekszerlag.favoriteseriesservice.service.OmdbService;
+import pl.bartekszerlag.favoriteseriesservice.service.SeriesService;
 
 import java.io.IOException;
 import java.util.List;
@@ -14,6 +21,7 @@ class SeriesController {
     private final OmdbService omdbService;
     private final SeriesService seriesService;
 
+    @Autowired
     SeriesController(OmdbService omdbService, SeriesService service) {
         this.omdbService = omdbService;
         this.seriesService = service;
@@ -54,6 +62,8 @@ class SeriesController {
             return ResponseEntity.ok(seriesService.update(id, series));
         } catch (SeriesNotFoundException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        } catch (DataIntegrityViolationException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
         }
     }
 
