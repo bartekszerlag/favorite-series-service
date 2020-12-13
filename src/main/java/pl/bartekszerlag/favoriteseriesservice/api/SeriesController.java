@@ -1,47 +1,33 @@
 package pl.bartekszerlag.favoriteseriesservice.api;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import pl.bartekszerlag.favoriteseriesservice.entity.Series;
-import pl.bartekszerlag.favoriteseriesservice.exception.SeriesLimitExceededException;
-import pl.bartekszerlag.favoriteseriesservice.exception.SeriesNotFoundException;
-import pl.bartekszerlag.favoriteseriesservice.service.OmdbService;
-import pl.bartekszerlag.favoriteseriesservice.service.SeriesService;
+import pl.bartekszerlag.favoriteseriesservice.domain.*;
+import pl.bartekszerlag.favoriteseriesservice.dto.SeriesDto;
 
-import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 @RestController
 class SeriesController {
 
-    private final OmdbService omdbService;
     private final SeriesService seriesService;
 
-    @Autowired
-    SeriesController(OmdbService omdbService, SeriesService service) {
-        this.omdbService = omdbService;
+    SeriesController(SeriesService service) {
         this.seriesService = service;
     }
 
     @GetMapping("/series")
-    ResponseEntity<List<Series>> getAllSeries() {
+    ResponseEntity<List<SeriesDto>> getAllSeries() {
         try {
-            return ResponseEntity.ok(seriesService.findAll());
+            List<SeriesDto> seriesDtoList = new ArrayList<>();
+            for (Series s : seriesService.findAll()) {
+                SeriesDto dto = seriesService.toSeriesDto(s);
+                seriesDtoList.add(dto);
+            }
+            return ResponseEntity.ok(seriesDtoList);
         } catch (RuntimeException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-        }
-    }
-
-    @GetMapping("/series/{id}")
-    ResponseEntity<JsonNode> getSeriesDetails(@PathVariable Integer id) throws IOException {
-        try {
-            String title = seriesService.getTitle(id);
-            return ResponseEntity.ok(omdbService.getSeriesDetails(title));
-        } catch (SeriesNotFoundException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
     }
@@ -51,7 +37,7 @@ class SeriesController {
         try {
             seriesService.add(series);
             return ResponseEntity.status(HttpStatus.CREATED).build();
-        } catch (SeriesLimitExceededException e) {
+        } catch (SeriesLimitExceededException | SeriesAlreadyExistException e) {
             return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).build();
         }
     }
@@ -62,8 +48,6 @@ class SeriesController {
             return ResponseEntity.ok(seriesService.update(id, series));
         } catch (SeriesNotFoundException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-        } catch (DataIntegrityViolationException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
         }
     }
 
