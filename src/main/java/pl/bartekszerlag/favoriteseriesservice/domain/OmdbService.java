@@ -1,4 +1,4 @@
-package pl.bartekszerlag.favoriteseriesservice.service;
+package pl.bartekszerlag.favoriteseriesservice.domain;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -11,7 +11,7 @@ import java.io.IOException;
 import java.net.URI;
 
 @Service
-public class OmdbService {
+class OmdbService {
 
     @Value("${omdb.host}")
     private String host;
@@ -19,7 +19,7 @@ public class OmdbService {
     @Value("${api.key}")
     private String apiKey;
 
-    public JsonNode getSeriesDetails(String title) throws IOException {
+    JsonNode getSeriesDetails(String title) throws IOException {
         RestTemplate restTemplate = new RestTemplate();
         URI targetUrl = UriComponentsBuilder.fromUriString(host)
                 .queryParam("apikey", apiKey)
@@ -28,10 +28,8 @@ public class OmdbService {
                 .encode()
                 .toUri();
 
-        String response = restTemplate.getForObject(
-                targetUrl,
-                String.class
-        );
+        String response = restTemplate.getForObject(targetUrl, String.class);
+
         return new ObjectMapper().readTree(response);
     }
 }

@@ -1,4 +1,4 @@
-package pl.bartekszerlag.favoriteseriesservice.exception;
+package pl.bartekszerlag.favoriteseriesservice.domain;
 
 public class SeriesLimitExceededException extends RuntimeException {
 }

@@ -8,7 +8,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
-import pl.bartekszerlag.favoriteseriesservice.entity.Series;
+import pl.bartekszerlag.favoriteseriesservice.domain.Series;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -29,17 +29,9 @@ class SeriesControllerTest {
     }
 
     @Test
-    void getSeriesDetails_shouldResponse200StatusCode() throws Exception {
-        //when
-        MvcResult result = mvc.perform(get("/series/1")).andReturn();
-        //then
-        assertEquals(200, result.getResponse().getStatus());
-    }
-
-    @Test
     void addSeries_shouldResponse201StatusCode() throws Exception {
         //given
-        Series series = new Series(2, "Test", 10.0, "Netflix");
+        Series series = new Series(2, "Test", "Netflix");
         //when
         MvcResult result = mvc.perform(post("/series")
                 .content(asJsonString(series))
@@ -52,7 +44,7 @@ class SeriesControllerTest {
     @Test
     void updateSeries_shouldResponse200StatusCode() throws Exception {
         //given
-        Series series = new Series(2, "Test2", 5.0, "HBO");
+        Series series = new Series(2, "Test2", "HBO");
         //when
         MvcResult result = mvc.perform(put("/series/1")
                 .content(asJsonString(series))
@@ -65,7 +57,7 @@ class SeriesControllerTest {
     @Test
     void deleteSeries_shouldResponse200StatusCode() throws Exception {
         //given
-        Series series = new Series(2, "Test", 10.0, "Netflix");
+        Series series = new Series(2, "Test", "Netflix");
         //and
         mvc.perform(post("/series")
                 .content(asJsonString(series))

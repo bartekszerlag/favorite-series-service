@@ -1,4 +1,4 @@
-package pl.bartekszerlag.favoriteseriesservice.entity;
+package pl.bartekszerlag.favoriteseriesservice.domain;
 
 import org.hibernate.annotations.GenericGenerator;
 
@@ -16,17 +16,15 @@ public class Series {
     @GenericGenerator(name = "inc", strategy = "increment")
     private Integer id;
     private String title;
-    private Double rate;
     private String platform;
 
     @SuppressWarnings("JPA needs it")
     public Series() {
     }
 
-    public Series(Integer id, String title, Double rate, String platform) {
+    public Series(Integer id, String title, String platform) {
         this.id = id;
         this.title = title;
-        this.rate = rate;
         this.platform = platform;
     }
 
@@ -40,14 +38,6 @@ public class Series {
 
     public void setTitle(String title) {
         this.title = title;
-    }
-
-    public Double getRate() {
-        return rate;
-    }
-
-    public void setRate(Double rate) {
-        this.rate = rate;
     }
 
     public String getPlatform() {
