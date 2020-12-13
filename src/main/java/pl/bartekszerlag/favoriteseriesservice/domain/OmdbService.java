@@ -13,19 +13,14 @@ import java.net.URI;
 @Service
 class OmdbService {
 
-    private final RestTemplate restTemplate;
-
     @Value("${omdb.host}")
     private String host;
 
     @Value("${api.key}")
     private String apiKey;
 
-    OmdbService(RestTemplate restTemplate) {
-        this.restTemplate = restTemplate;
-    }
-
     JsonNode getSeriesDetails(String title) throws IOException {
+        RestTemplate restTemplate = new RestTemplate();
         URI targetUrl = UriComponentsBuilder.fromUriString(host)
                 .queryParam("apikey", apiKey)
                 .queryParam("t", title)
