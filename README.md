@@ -1,1 +1,1 @@
-# series-rating-service
+# favorite-series-service
