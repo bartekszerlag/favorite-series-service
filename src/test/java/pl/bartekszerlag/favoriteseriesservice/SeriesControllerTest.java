@@ -42,19 +42,6 @@ class SeriesControllerTest {
     }
 
     @Test
-    void updateSeries_shouldResponse200StatusCode() throws Exception {
-        //given
-        Series series = new Series(2, "Test2", "HBO");
-        //when
-        MvcResult result = mvc.perform(put("/series/1")
-                .content(asJsonString(series))
-                .contentType(MediaType.APPLICATION_JSON))
-                .andReturn();
-        //then
-        assertEquals(200, result.getResponse().getStatus());
-    }
-
-    @Test
     void deleteSeries_shouldResponse200StatusCode() throws Exception {
         //given
         Series series = new Series(2, "Test", "Netflix");

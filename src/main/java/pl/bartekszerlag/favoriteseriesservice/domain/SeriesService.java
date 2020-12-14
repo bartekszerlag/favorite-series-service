@@ -1,19 +1,20 @@
 package pl.bartekszerlag.favoriteseriesservice.domain;
 
-import com.fasterxml.jackson.databind.JsonNode;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import pl.bartekszerlag.favoriteseriesservice.dto.SeriesDto;
 
-import java.io.IOException;
 import java.util.List;
 
+import static java.lang.String.format;
 import static pl.bartekszerlag.favoriteseriesservice.domain.Platform.*;
 
 @Service
 public
 class SeriesService {
 
-    public final static int RANK_LIMIT = 10;
+    @Value("${rank.limit}")
+    private Integer rankLimit;
 
     private final SeriesRepository repository;
     private final OmdbService omdbService;
@@ -27,39 +28,27 @@ class SeriesService {
         return repository.findAll();
     }
 
-    public Series add(Series series) {
-        if (findAll().size() >= RANK_LIMIT) {
-            throw new SeriesLimitExceededException();
+    public void add(Series series) {
+        if (findAll().size() >= rankLimit) {
+            throw new SeriesLimitExceededException(format("Series limit is: %d", rankLimit));
         }
         for (Series s : findAll()) {
             if (s.getTitle().toLowerCase().equals(series.getTitle().toLowerCase()))
-                throw new SeriesAlreadyExistException();
+                throw new SeriesAlreadyExistException(format("Series with title: %s already exist", series.getTitle()));
         }
-        return repository.save(series);
-    }
-
-    public Series update(Integer id, Series oldSeries) {
-        Series series = findById(id);
-        series.setTitle(oldSeries.getTitle());
-        series.setPlatform(oldSeries.getPlatform());
-
-        return repository.save(series);
+        repository.save(series);
     }
 
     public void delete(Integer id) {
-        Series series = findById(id);
+        Series series = repository.findById(id).orElseThrow(
+                () -> new SeriesNotFoundException(format("Series with id: %d not exist", id))
+        );
         repository.delete(series);
     }
 
     public SeriesDto toSeriesDto(Series series) {
-        double rating = 0;
         Platform platform = OTHER;
-        try {
-            JsonNode seriesDetails = omdbService.getSeriesDetails(series.getTitle());
-            rating = seriesDetails.path("imdbRating").asDouble();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        Double rating = omdbService.getSeriesRating(series.getTitle());
         String platformName = series.getPlatform().toUpperCase();
         if (platformName.equals("NETFLIX")) {
             platform = NETFLIX;
@@ -67,9 +56,5 @@ class SeriesService {
             platform = HBO;
         }
         return new SeriesDto(series.getId(), series.getTitle(), rating, platform);
-    }
-
-    private Series findById(Integer id) {
-        return repository.findById(id).orElseThrow(SeriesNotFoundException::new);
     }
 }
