@@ -10,6 +10,7 @@ import pl.bartekszerlag.favoriteseriesservice.dto.SeriesDto;
 import java.util.ArrayList;
 import java.util.List;
 
+@CrossOrigin(origins = "http://localhost:3000")
 @RestController
 class SeriesController {
 
