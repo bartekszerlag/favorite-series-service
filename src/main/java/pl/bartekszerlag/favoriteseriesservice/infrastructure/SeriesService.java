@@ -1,7 +1,8 @@
-package pl.bartekszerlag.favoriteseriesservice.domain;
+package pl.bartekszerlag.favoriteseriesservice.infrastructure;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import pl.bartekszerlag.favoriteseriesservice.domain.*;
 import pl.bartekszerlag.favoriteseriesservice.dto.SeriesDto;
 
 import java.util.List;

@@ -1,4 +1,4 @@
-package pl.bartekszerlag.favoriteseriesservice.domain;
+package pl.bartekszerlag.favoriteseriesservice.infrastructure;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;

@@ -31,7 +31,7 @@ class SeriesControllerTest {
     @Test
     void addSeries_shouldResponse201StatusCode() throws Exception {
         //given
-        Series series = new Series(2, "Test", "Netflix");
+        Series series = new Series(null, "Test", "Netflix");
         //when
         MvcResult result = mvc.perform(post("/series")
                 .content(asJsonString(series))
@@ -44,13 +44,14 @@ class SeriesControllerTest {
     @Test
     void deleteSeries_shouldResponse200StatusCode() throws Exception {
         //given
-        Series series = new Series(2, "Test", "Netflix");
+        Series series = new Series(null, "Test", "Netflix");
         //and
         mvc.perform(post("/series")
                 .content(asJsonString(series))
-                .contentType(MediaType.APPLICATION_JSON));
+                .contentType(MediaType.APPLICATION_JSON))
+                .andReturn();
         //when
-        MvcResult result = mvc.perform(delete("/series/2")).andReturn();
+        MvcResult result = mvc.perform(delete("/series/1")).andReturn();
         //then
         assertEquals(200, result.getResponse().getStatus());
     }

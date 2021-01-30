@@ -1,4 +1,4 @@
-package pl.bartekszerlag.favoriteseriesservice.api;
+package pl.bartekszerlag.favoriteseriesservice.infrastructure.api;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -6,6 +6,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 import pl.bartekszerlag.favoriteseriesservice.domain.*;
 import pl.bartekszerlag.favoriteseriesservice.dto.SeriesDto;
+import pl.bartekszerlag.favoriteseriesservice.infrastructure.SeriesService;
 
 import java.util.ArrayList;
 import java.util.List;
