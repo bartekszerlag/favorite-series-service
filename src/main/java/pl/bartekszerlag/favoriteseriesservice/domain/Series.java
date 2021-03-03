@@ -22,7 +22,7 @@ public class Series {
     public Series() {
     }
 
-    public Series(Integer id, String title, String platform) {
+    private Series(Integer id, String title, String platform) {
         this.id = id;
         this.title = title;
         this.platform = platform;
@@ -46,5 +46,33 @@ public class Series {
 
     public void setPlatform(String platform) {
         this.platform = platform;
+    }
+
+    public static class Builder {
+        private Integer id;
+        private String title;
+        private String platform;
+
+        public Builder() {
+        }
+
+        public Builder withId(Integer id) {
+            this.id = id;
+            return this;
+        }
+
+        public Builder withTitle(String title) {
+            this.title = title;
+            return  this;
+        }
+
+        public Builder withPlatform(String platform) {
+            this.platform = platform;
+            return  this;
+        }
+
+        public Series build() {
+            return new Series(id, title, platform);
+        }
     }
 }

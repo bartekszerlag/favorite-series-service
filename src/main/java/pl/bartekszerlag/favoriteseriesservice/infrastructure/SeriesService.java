@@ -33,10 +33,12 @@ class SeriesService {
         if (findAll().size() >= rankLimit) {
             throw new SeriesLimitExceededException(format("Series limit is: %d", rankLimit));
         }
+
         for (Series s : findAll()) {
-            if (s.getTitle().toLowerCase().equals(series.getTitle().toLowerCase()))
+            if (s.getTitle().equalsIgnoreCase(series.getTitle()))
                 throw new SeriesAlreadyExistException(format("Series with title: %s already exist", series.getTitle()));
         }
+
         repository.save(series);
     }
 
@@ -44,6 +46,7 @@ class SeriesService {
         Series series = repository.findById(id).orElseThrow(
                 () -> new SeriesNotFoundException(format("Series with id: %d not exist", id))
         );
+
         repository.delete(series);
     }
 
@@ -51,11 +54,13 @@ class SeriesService {
         Platform platform = OTHER;
         Double rating = omdbService.getSeriesRating(series.getTitle());
         String platformName = series.getPlatform().toUpperCase();
+
         if (platformName.equals("NETFLIX")) {
             platform = NETFLIX;
         } else if (platformName.equals("HBO")) {
             platform = HBO;
         }
+
         return new SeriesDto(series.getId(), series.getTitle(), rating, platform);
     }
 }

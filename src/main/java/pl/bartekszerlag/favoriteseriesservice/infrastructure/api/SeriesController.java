@@ -4,7 +4,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
-import pl.bartekszerlag.favoriteseriesservice.domain.*;
+import pl.bartekszerlag.favoriteseriesservice.domain.Series;
+import pl.bartekszerlag.favoriteseriesservice.domain.SeriesAlreadyExistException;
+import pl.bartekszerlag.favoriteseriesservice.domain.SeriesLimitExceededException;
+import pl.bartekszerlag.favoriteseriesservice.domain.SeriesNotFoundException;
 import pl.bartekszerlag.favoriteseriesservice.dto.SeriesDto;
 import pl.bartekszerlag.favoriteseriesservice.infrastructure.SeriesService;
 
@@ -24,10 +27,12 @@ class SeriesController {
     @GetMapping("/series")
     ResponseEntity<List<SeriesDto>> getAllSeries() {
         List<SeriesDto> seriesDtoList = new ArrayList<>();
+
         for (Series s : seriesService.findAll()) {
             SeriesDto dto = seriesService.toSeriesDto(s);
             seriesDtoList.add(dto);
         }
+
         return ResponseEntity.ok(seriesDtoList);
     }
 
@@ -35,7 +40,7 @@ class SeriesController {
     ResponseEntity<Series> addSeries(@RequestBody Series series) {
         try {
             seriesService.add(series);
-            return ResponseEntity.status(HttpStatus.CREATED).build();
+            return ResponseEntity.status(HttpStatus.CREATED).body(series);
         } catch (SeriesLimitExceededException e) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, e.getMessage());
         } catch (SeriesAlreadyExistException e) {

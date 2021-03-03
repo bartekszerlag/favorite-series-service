@@ -6,16 +6,19 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import pl.bartekszerlag.favoriteseriesservice.domain.Series;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.springframework.test.annotation.DirtiesContext.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 
 @SpringBootTest
 @AutoConfigureMockMvc
-class SeriesControllerTest {
+@DirtiesContext(classMode = ClassMode.BEFORE_EACH_TEST_METHOD)
+class SeriesControllerTests {
 
     @Autowired
     private MockMvc mvc;
@@ -24,6 +27,7 @@ class SeriesControllerTest {
     void getAllSeries_shouldResponse200StatusCode() throws Exception {
         //when
         MvcResult result = mvc.perform(get("/series")).andReturn();
+
         //then
         assertEquals(200, result.getResponse().getStatus());
     }
@@ -31,12 +35,17 @@ class SeriesControllerTest {
     @Test
     void addSeries_shouldResponse201StatusCode() throws Exception {
         //given
-        Series series = new Series(null, "Test", "Netflix");
+        Series series = new Series.Builder()
+                .withTitle("Test")
+                .withPlatform("HBO")
+                .build();
+
         //when
         MvcResult result = mvc.perform(post("/series")
                 .content(asJsonString(series))
                 .contentType(MediaType.APPLICATION_JSON))
                 .andReturn();
+
         //then
         assertEquals(201, result.getResponse().getStatus());
     }
@@ -44,14 +53,20 @@ class SeriesControllerTest {
     @Test
     void deleteSeries_shouldResponse200StatusCode() throws Exception {
         //given
-        Series series = new Series(null, "Test", "Netflix");
+        Series series = new Series.Builder()
+                .withTitle("Test")
+                .withPlatform("HBO")
+                .build();
+
         //and
         mvc.perform(post("/series")
                 .content(asJsonString(series))
                 .contentType(MediaType.APPLICATION_JSON))
                 .andReturn();
+
         //when
         MvcResult result = mvc.perform(delete("/series/1")).andReturn();
+
         //then
         assertEquals(200, result.getResponse().getStatus());
     }
