@@ -4,12 +4,15 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
-import pl.bartekszerlag.favoriteseriesservice.domain.*;
+import pl.bartekszerlag.favoriteseriesservice.domain.Series;
+import pl.bartekszerlag.favoriteseriesservice.domain.SeriesAlreadyExistException;
+import pl.bartekszerlag.favoriteseriesservice.domain.SeriesLimitExceededException;
+import pl.bartekszerlag.favoriteseriesservice.domain.SeriesNotFoundException;
 import pl.bartekszerlag.favoriteseriesservice.dto.SeriesDto;
 import pl.bartekszerlag.favoriteseriesservice.infrastructure.SeriesService;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @CrossOrigin(origins = "http://localhost:3000")
 @RestController
@@ -23,18 +26,18 @@ class SeriesController {
 
     @GetMapping("/series")
     ResponseEntity<List<SeriesDto>> getAllSeries() {
-        List<SeriesDto> seriesDtoList = new ArrayList<>();
-        for (Series s : seriesService.findAll()) {
-            SeriesDto dto = seriesService.toSeriesDto(s);
-            seriesDtoList.add(dto);
-        }
+        List<SeriesDto> seriesDtoList = seriesService.getAllSeries()
+                .stream()
+                .map(seriesService::toSeriesDto)
+                .collect(Collectors.toList());
+
         return ResponseEntity.ok(seriesDtoList);
     }
 
     @PostMapping("/series")
     ResponseEntity<Series> addSeries(@RequestBody Series series) {
         try {
-            seriesService.add(series);
+            seriesService.addSeries(series);
             return ResponseEntity.status(HttpStatus.CREATED).build();
         } catch (SeriesLimitExceededException e) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, e.getMessage());
@@ -46,7 +49,7 @@ class SeriesController {
     @DeleteMapping("/series/{id}")
     ResponseEntity<Void> deleteSeries(@PathVariable Integer id) {
         try {
-            seriesService.delete(id);
+            seriesService.deleteSeries(id);
             return ResponseEntity.status(HttpStatus.OK).build();
         } catch (SeriesNotFoundException e) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());

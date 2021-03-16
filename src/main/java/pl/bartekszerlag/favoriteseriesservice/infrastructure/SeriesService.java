@@ -25,25 +25,30 @@ class SeriesService {
         this.omdbService = omdbService;
     }
 
-    public List<Series> findAll() {
+    public List<Series> getAllSeries() {
         return repository.findAll();
     }
 
-    public void add(Series series) {
-        if (findAll().size() >= rankLimit) {
+    public void addSeries(Series series) {
+        if (getAllSeries().size() >= rankLimit) {
             throw new SeriesLimitExceededException(format("Series limit is: %d", rankLimit));
         }
-        for (Series s : findAll()) {
-            if (s.getTitle().toLowerCase().equals(series.getTitle().toLowerCase()))
-                throw new SeriesAlreadyExistException(format("Series with title: %s already exist", series.getTitle()));
-        }
+
+        getAllSeries()
+                .stream()
+                .filter(s -> s.getTitle().equalsIgnoreCase(series.getTitle()))
+                .forEach(s -> {
+                    throw new SeriesAlreadyExistException(format("Series with title: %s already exist", series.getTitle()));
+                });
+
         repository.save(series);
     }
 
-    public void delete(Integer id) {
-        Series series = repository.findById(id).orElseThrow(
-                () -> new SeriesNotFoundException(format("Series with id: %d not exist", id))
-        );
+    public void deleteSeries(Integer id) {
+        Series series = repository
+                .findById(id)
+                .orElseThrow(() -> new SeriesNotFoundException(format("Series with id: %d not exist", id)));
+
         repository.delete(series);
     }
 
@@ -51,11 +56,13 @@ class SeriesService {
         Platform platform = OTHER;
         Double rating = omdbService.getSeriesRating(series.getTitle());
         String platformName = series.getPlatform().toUpperCase();
+
         if (platformName.equals("NETFLIX")) {
             platform = NETFLIX;
         } else if (platformName.equals("HBO")) {
             platform = HBO;
         }
+
         return new SeriesDto(series.getId(), series.getTitle(), rating, platform);
     }
 }
