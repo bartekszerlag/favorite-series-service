@@ -47,8 +47,7 @@ class SeriesService {
     public void deleteSeries(Integer id) {
         Series series = repository
                 .findById(id)
-                .orElseThrow(() -> new SeriesNotFoundException(format("Series with id: %d not exist", id))
-                );
+                .orElseThrow(() -> new SeriesNotFoundException(format("Series with id: %d not exist", id)));
 
         repository.delete(series);
     }
