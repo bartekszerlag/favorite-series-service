@@ -24,6 +24,7 @@ class SeriesControllerTest {
     void getAllSeries_shouldResponse200StatusCode() throws Exception {
         //when
         MvcResult result = mvc.perform(get("/series")).andReturn();
+
         //then
         assertEquals(200, result.getResponse().getStatus());
     }
@@ -31,12 +32,17 @@ class SeriesControllerTest {
     @Test
     void addSeries_shouldResponse201StatusCode() throws Exception {
         //given
-        Series series = new Series(null, "Test", "Netflix");
+        Series series = new Series.Builder()
+                .withTitle("Test")
+                .withPlatform("Netflix")
+                .build();
+
         //when
         MvcResult result = mvc.perform(post("/series")
                 .content(asJsonString(series))
                 .contentType(MediaType.APPLICATION_JSON))
                 .andReturn();
+
         //then
         assertEquals(201, result.getResponse().getStatus());
     }
@@ -44,14 +50,20 @@ class SeriesControllerTest {
     @Test
     void deleteSeries_shouldResponse200StatusCode() throws Exception {
         //given
-        Series series = new Series(null, "Test", "Netflix");
+        Series series = new Series.Builder()
+                .withTitle("Test")
+                .withPlatform("Netflix")
+                .build();
+
         //and
         mvc.perform(post("/series")
                 .content(asJsonString(series))
                 .contentType(MediaType.APPLICATION_JSON))
                 .andReturn();
+
         //when
         MvcResult result = mvc.perform(delete("/series/1")).andReturn();
+
         //then
         assertEquals(200, result.getResponse().getStatus());
     }

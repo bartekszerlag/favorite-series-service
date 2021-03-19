@@ -55,11 +55,11 @@ class SeriesService {
     public SeriesDto toSeriesDto(Series series) {
         Platform platform = OTHER;
         Double rating = omdbService.getSeriesRating(series.getTitle());
-        String platformName = series.getPlatform().toUpperCase();
+        String userPlatform = series.getPlatform().toUpperCase();
 
-        if (platformName.equals("NETFLIX")) {
+        if (userPlatform.equals(NETFLIX.getName())) {
             platform = NETFLIX;
-        } else if (platformName.equals("HBO")) {
+        } else if (userPlatform.equals(HBO.getName())) {
             platform = HBO;
         }
 

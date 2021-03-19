@@ -15,6 +15,7 @@ import java.net.URI;
 class OmdbService {
 
     private final Logger logger = LoggerFactory.getLogger(OmdbService.class);
+    private final RestTemplate restTemplate;
 
     @Value("${omdb.host}")
     private String host;
@@ -22,22 +23,29 @@ class OmdbService {
     @Value("${api.key}")
     private String apiKey;
 
+    OmdbService(RestTemplate restTemplate) {
+        this.restTemplate = restTemplate;
+    }
+
     Double getSeriesRating(String title) {
-        RestTemplate restTemplate = new RestTemplate();
-        URI targetUrl = UriComponentsBuilder.fromUriString(host)
+        URI targetUri = getTargetUri(title);
+        String response = restTemplate.getForObject(targetUri, String.class);
+        Double rating = null;
+
+        try {
+            rating = new ObjectMapper().readTree(response).path("imdbRating").asDouble();
+        } catch (JsonProcessingException e) {
+            logger.info("--- Fetching series rating failed ---");
+        }
+        return rating;
+    }
+
+    private URI getTargetUri(String title) {
+        return UriComponentsBuilder.fromUriString(host)
                 .queryParam("apikey", apiKey)
                 .queryParam("t", title)
                 .build()
                 .encode()
                 .toUri();
-
-        Double rating = null;
-        String response = restTemplate.getForObject(targetUrl, String.class);
-        try {
-            rating = new ObjectMapper().readTree(response).path("imdbRating").asDouble();
-        } catch (JsonProcessingException e) {
-            logger.debug("--- Fetching series rating failed ---");
-        }
-        return rating;
     }
 }

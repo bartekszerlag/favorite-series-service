@@ -38,7 +38,7 @@ class SeriesController {
     ResponseEntity<Series> addSeries(@RequestBody Series series) {
         try {
             seriesService.addSeries(series);
-            return ResponseEntity.status(HttpStatus.CREATED).build();
+            return ResponseEntity.status(HttpStatus.CREATED).body(series);
         } catch (SeriesLimitExceededException e) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, e.getMessage());
         } catch (SeriesAlreadyExistException e) {
