@@ -31,7 +31,11 @@ class SeriesControllerTest {
     @Test
     void addSeries_shouldResponse201StatusCode() throws Exception {
         //given
-        Series series = new Series(null, "Test", "Netflix");
+        Series series = new Series.Builder()
+                .withTitle("Test")
+                .withPlatform("Netflix")
+                .build();
+
         //when
         MvcResult result = mvc.perform(post("/series")
                 .content(asJsonString(series))
@@ -44,7 +48,11 @@ class SeriesControllerTest {
     @Test
     void deleteSeries_shouldResponse200StatusCode() throws Exception {
         //given
-        Series series = new Series(null, "Test", "Netflix");
+        Series series = new Series.Builder()
+                .withTitle("Test")
+                .withPlatform("Netflix")
+                .build();
+
         //and
         mvc.perform(post("/series")
                 .content(asJsonString(series))
