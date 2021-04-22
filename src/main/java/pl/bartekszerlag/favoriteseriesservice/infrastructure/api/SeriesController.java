@@ -12,7 +12,6 @@ import pl.bartekszerlag.favoriteseriesservice.dto.SeriesDto;
 import pl.bartekszerlag.favoriteseriesservice.infrastructure.SeriesService;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @CrossOrigin(origins = "http://localhost:3000")
 @RestController
@@ -26,19 +25,13 @@ class SeriesController {
 
     @GetMapping("/series")
     ResponseEntity<List<SeriesDto>> getAllSeries() {
-        List<SeriesDto> seriesDtoList = seriesService.getAllSeries()
-                .stream()
-                .map(seriesService::toSeriesDto)
-                .collect(Collectors.toList());
-
-        return ResponseEntity.ok(seriesDtoList);
+        return ResponseEntity.ok(seriesService.getAllSeries());
     }
 
     @PostMapping("/series")
-    ResponseEntity<Series> addSeries(@RequestBody Series series) {
+    ResponseEntity<SeriesDto> addSeries(@RequestBody Series series) {
         try {
-            seriesService.addSeries(series);
-            return ResponseEntity.status(HttpStatus.CREATED).body(series);
+            return ResponseEntity.status(HttpStatus.CREATED).body(seriesService.addSeries(series));
         } catch (SeriesLimitExceededException e) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, e.getMessage());
         } catch (SeriesAlreadyExistException e) {
@@ -50,9 +43,14 @@ class SeriesController {
     ResponseEntity<Void> deleteSeries(@PathVariable Integer id) {
         try {
             seriesService.deleteSeries(id);
-            return ResponseEntity.status(HttpStatus.OK).build();
+            return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
         } catch (SeriesNotFoundException e) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
         }
+    }
+
+    @GetMapping(value = "/secret")
+    public ResponseEntity<String> getSecretMessage() {
+        return ResponseEntity.status(HttpStatus.OK).body(seriesService.getSecretMessage());
     }
 }

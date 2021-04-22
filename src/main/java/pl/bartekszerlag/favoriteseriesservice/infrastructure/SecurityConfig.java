@@ -34,9 +34,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         http.authorizeRequests()
-                .antMatchers("/series").hasRole(role)
-                .antMatchers("/h2").permitAll()
-                .antMatchers("/swagger-ui.html").permitAll()
+                .antMatchers("/secret").hasRole(role)
                 .and()
                 .formLogin().permitAll()
                 .and()
