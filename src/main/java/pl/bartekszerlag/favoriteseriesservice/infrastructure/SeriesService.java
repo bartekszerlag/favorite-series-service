@@ -6,6 +6,7 @@ import pl.bartekszerlag.favoriteseriesservice.domain.*;
 import pl.bartekszerlag.favoriteseriesservice.dto.SeriesDto;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static java.lang.String.format;
 import static pl.bartekszerlag.favoriteseriesservice.domain.Platform.*;
@@ -16,32 +17,33 @@ class SeriesService {
 
     @Value("${rank.limit}")
     private Integer rankLimit;
-
     private final SeriesRepository repository;
-    private final OmdbService omdbService;
+    private final ExternalApiService externalApiService;
 
-    public SeriesService(SeriesRepository repository, OmdbService omdbService) {
+    public SeriesService(SeriesRepository repository, ExternalApiService externalApiService) {
         this.repository = repository;
-        this.omdbService = omdbService;
+        this.externalApiService = externalApiService;
     }
 
-    public List<Series> getAllSeries() {
-        return repository.findAll();
+    public List<SeriesDto> getAllSeries() {
+        return repository.findAll()
+                .stream()
+                .map(this::toSeriesDto)
+                .collect(Collectors.toList());
     }
 
-    public void addSeries(Series series) {
+    public SeriesDto addSeries(Series series) {
         if (getAllSeries().size() >= rankLimit) {
             throw new SeriesLimitExceededException(format("Series limit is: %d", rankLimit));
         }
 
-        getAllSeries()
-                .stream()
-                .filter(s -> s.getTitle().equalsIgnoreCase(series.getTitle()))
-                .forEach(s -> {
-                    throw new SeriesAlreadyExistException(format("Series with title: %s already exist", series.getTitle()));
-                });
+        if (seriesExist(series)) {
+            throw new SeriesAlreadyExistException(format("Series with title: %s already exist", series.getTitle()));
+        }
 
         repository.save(series);
+
+        return toSeriesDto(series);
     }
 
     public void deleteSeries(Integer id) {
@@ -52,17 +54,28 @@ class SeriesService {
         repository.delete(series);
     }
 
-    public SeriesDto toSeriesDto(Series series) {
+    public String getSecretMessage() {
+        return externalApiService.generateSecretMessage();
+    }
+
+    private SeriesDto toSeriesDto(Series series) {
         Platform platform = OTHER;
-        Double rating = omdbService.getSeriesRating(series.getTitle());
+        Double rating = externalApiService.getSeriesRating(series.getTitle());
         String userPlatform = series.getPlatform().toUpperCase();
 
         if (userPlatform.equals(NETFLIX.getName())) {
             platform = NETFLIX;
-        } else if (userPlatform.equals(HBO.getName())) {
+        }
+        if (userPlatform.equals(HBO.getName())) {
             platform = HBO;
         }
 
         return new SeriesDto(series.getId(), series.getTitle(), rating, platform);
+    }
+
+    private boolean seriesExist(Series series) {
+        return getAllSeries()
+                .stream()
+                .anyMatch(s -> s.getTitle().equalsIgnoreCase(series.getTitle()));
     }
 }

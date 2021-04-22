@@ -12,24 +12,27 @@ import org.springframework.web.util.UriComponentsBuilder;
 import java.net.URI;
 
 @Service
-class OmdbService {
+class ExternalApiService {
 
-    private final Logger logger = LoggerFactory.getLogger(OmdbService.class);
+    private final Logger logger = LoggerFactory.getLogger(ExternalApiService.class);
     private final RestTemplate restTemplate;
 
-    @Value("${omdb.host}")
-    private String host;
+    @Value("${omdb.uri}")
+    private String omdbUri;
 
-    @Value("${api.key}")
-    private String apiKey;
+    @Value("${omdb.key}")
+    private String omdbKey;
 
-    OmdbService(RestTemplate restTemplate) {
+    @Value("${bored.uri}")
+    private String boredUri;
+
+    ExternalApiService(RestTemplate restTemplate) {
         this.restTemplate = restTemplate;
     }
 
     Double getSeriesRating(String title) {
-        URI targetUri = getTargetUri(title);
-        String response = restTemplate.getForObject(targetUri, String.class);
+        URI uri = getTargetUri(title);
+        String response = restTemplate.getForObject(uri, String.class);
         Double rating = null;
 
         try {
@@ -37,12 +40,27 @@ class OmdbService {
         } catch (JsonProcessingException e) {
             logger.info("--- Fetching series rating failed ---");
         }
+
         return rating;
     }
 
+    String generateSecretMessage() {
+        URI uri = URI.create(boredUri);
+        String response = restTemplate.getForObject(uri, String.class);
+        String secretMessage = "If you are bored of watching TV series try: ";
+
+        try {
+            secretMessage += new ObjectMapper().readTree(response).path("activity").asText();
+        } catch (JsonProcessingException e) {
+            secretMessage += "Bored API service unavailable. Please try later";
+        }
+
+        return secretMessage;
+    }
+
     private URI getTargetUri(String title) {
-        return UriComponentsBuilder.fromUriString(host)
-                .queryParam("apikey", apiKey)
+        return UriComponentsBuilder.fromUriString(omdbUri)
+                .queryParam("apikey", omdbKey)
                 .queryParam("t", title)
                 .build()
                 .encode()
