@@ -16,7 +16,6 @@ class SeriesService {
 
     @Value("${rank.limit}")
     private Integer rankLimit;
-
     private final SeriesRepository repository;
     private final OmdbService omdbService;
 
@@ -34,12 +33,9 @@ class SeriesService {
             throw new SeriesLimitExceededException(format("Series limit is: %d", rankLimit));
         }
 
-        getAllSeries()
-                .stream()
-                .filter(s -> s.getTitle().equalsIgnoreCase(series.getTitle()))
-                .forEach(s -> {
-                    throw new SeriesAlreadyExistException(format("Series with title: %s already exist", series.getTitle()));
-                });
+        if (seriesExist(series)) {
+            throw new SeriesAlreadyExistException(format("Series with title: %s already exist", series.getTitle()));
+        }
 
         repository.save(series);
     }
@@ -59,10 +55,17 @@ class SeriesService {
 
         if (userPlatform.equals(NETFLIX.getName())) {
             platform = NETFLIX;
-        } else if (userPlatform.equals(HBO.getName())) {
+        }
+        if (userPlatform.equals(HBO.getName())) {
             platform = HBO;
         }
 
         return new SeriesDto(series.getId(), series.getTitle(), rating, platform);
+    }
+
+    private boolean seriesExist(Series series) {
+        return getAllSeries()
+                .stream()
+                .anyMatch(s -> s.getTitle().equalsIgnoreCase(series.getTitle()));
     }
 }
